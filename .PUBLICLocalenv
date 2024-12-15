@@ -1,0 +1,33 @@
+ENV=dev
+
+NETWORK_NAME=MP-dev-net1-overlay
+LOG_LEVEL=debug
+
+
+TEMPORAL_NAMESPACE=ob1-temporal-namespace
+TEMPORAL_ADDRESS=temporal-server-1.manuplex-uswest-2.local:7233
+AG_TEMPORAL_TASK_QUE_NAME=agentprocess_QUEUE
+
+REDIS_STACK_HOST=redis-stack-server-1.manuplex-uswest-2.local
+REDIS_STACK_PORT=6379
+REDIS_STACK_PASSWORD=
+
+
+
+# Health check interval in milliseconds
+WS_HEALTHCHECK_INTERVAL=30000
+
+# Health check timeout in milliseconds
+WS_HEALTHCHECK_TIMEOUT=2000
+
+# Wait time for shutdown in milliseconds
+WS_WAIT_SHUTDOWN_TIME=15000
+
+# Maximum number of shutdown attempts
+WS_MAX_SHUTDOWN_ATTEMPTS=3
+
+# Maximum number of missed health checks
+WS_MAX_HEALTHCHECK_MISSED=9
+
+# Maximum execution time in milliseconds
+WS_MAX_EXECUTION_TIME=900000

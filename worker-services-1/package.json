@@ -1,0 +1,31 @@
+{
+  "name": "worker-services-1",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node ./supervisorV2/supervisor.js",
+    "watch:build": "tsc --watch",
+    "start:watch": "npm run watch:build & npm run start",
+    "stop": "pkill -f ./supervisorV2/supervisor.js",
+    "restart": "npm run stop && npm run start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.9.0",
+    "pm2": "^5.4.3",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.4.15",
+    "@temporalio/client": "^1.11.5",
+    "@temporalio/worker": "^1.11.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "redis": "^4.7.0"
+  }
+}
