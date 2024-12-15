@@ -32,8 +32,6 @@ volumes:
     driver: local
 
 networks:
-  MP-local-net1-overlay:
-    external: true
   MP-dev-net1-overlay:
     external: true
   MP-prod-net1-overlay:
