@@ -29,7 +29,7 @@ services:
     command: >
       sh -c "
       export REDIS_STACK_PASSWORD=$$(cat /run/secrets/WORKER_SERVICES_REDIS_STACK_PASSWORD | tr -d '\\n') &&
-      node --trace-warnings dist/supervisorV2/supervisor.js"
+      node --trace-warnings ./supervisorV2/supervisor.js"
     logging:
       driver: "json-file"
       options:
