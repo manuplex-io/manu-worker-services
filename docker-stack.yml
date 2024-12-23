@@ -35,6 +35,10 @@ services:
       options:
         max-size: "15m"
         max-file: "3"
+    deploy:
+      placement:
+        constraints:
+          - "node.hostname == MP1-prod0"
 
 networks:
   MP-dev-net1-overlay:
