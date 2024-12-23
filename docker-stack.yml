@@ -1,5 +1,5 @@
 services:
-  application-services-1:
+  worker-services-1:
     image: 637423298319.dkr.ecr.us-west-2.amazonaws.com/manu/worker-services:latest
     hostname: worker-services-1.manuplex-uswest-2.local
     networks:
@@ -29,7 +29,7 @@ services:
     command: >
       sh -c "
       export REDIS_STACK_PASSWORD=$$(cat /run/secrets/WORKER_SERVICES_REDIS_STACK_PASSWORD | tr -d '\\n') &&
-      node --trace-warnings dist/main.js"
+      node --trace-warnings dist/supervisorV2/supervisor.js"
     logging:
       driver: "json-file"
       options:
