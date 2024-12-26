@@ -4,6 +4,7 @@ import { DynamicLoadingService } from './services/dynamicLoading.service';
 import { WorkerManagementService } from './services/workerManagement.service';
 import { Logger } from '@nestjs/common';
 import { getTemporalConnection, getWorkflowClient } from './config/temporal.config';
+import express from 'express';
 
 const logger = new Logger('Supervisor');
 
@@ -116,7 +117,29 @@ async function pollTemporalWorkflows(
     }, SUPERVISOR_CHECK_INTERVAL);
 }
 
+function startExpressServer() {
+    const app = express();
+    const PORT = process.env.PORT || 3000; // Use environment variable or default to 3000
+
+    // Health check route
+    app.get('/services/health', (req, res) => {
+        // Define your health check logic
+            res.status(200).json({ status: 'ok' });
+    });
+
+    // Start the server
+    app.listen(PORT, () => {
+        logger.log(`Express server is running at http://localhost:${PORT}/services/health`);
+    });
+
+    app.on('error', (err: any) => {
+        logger.error(`Express server error: ${err.message}`);
+    });
+}
+
 async function main() {
+
+    startExpressServer()
 
     const redisService = new RedisService();
     const dynamicLoadingService = new DynamicLoadingService(redisService);

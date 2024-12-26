@@ -30,6 +30,16 @@ services:
       sh -c "
       export REDIS_STACK_PASSWORD=$$(cat /run/secrets/WORKER_SERVICES_REDIS_STACK_PASSWORD | tr -d '\\n') &&
       node --trace-warnings ./supervisorV2/supervisor.js"
+    labels:
+      # Consul Labels
+      - "register-consul.enable=true"
+      - "register-consul.service-id=worker-services-1"
+      - "register-consul.service-name= worker-services"
+      - "register-consul.check.healthcheck-endpoint=http://worker-services-1.manuplex-uswest-2.local:3000/services/health"
+      - "register-consul.service-tags=worker-services,manu-os,nestjs,prod"
+      - "register-consul.check.interval=15s"
+      - "register-consul.check.timeout=1s"
+      - "register-consul.check.deregister=72h"
     logging:
       driver: "json-file"
       options:
