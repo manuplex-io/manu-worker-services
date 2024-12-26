@@ -24,6 +24,7 @@ services:
       - WS_MAX_HEALTHCHECK_MISSED=9
       - WS_MAX_EXECUTION_TIME=900000
       - RESTART_DELAY=1000
+      - SERVICE_ID="{{.Task.ID}}"
     secrets:
       - WORKER_SERVICES_REDIS_STACK_PASSWORD
     command: >
