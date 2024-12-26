@@ -1,0 +1,11 @@
+version: 0.0
+os: linux
+files:
+  - source: scripts/
+    destination: /home/ec2-user/codeDeploy/scripts/
+  - source: image_tag.txt
+    destination: /home/ec2-user/codeDeploy/  
+hooks:
+  AfterInstall:
+    - location: scripts/deployDocker.sh #change to deployDocker.sh when changing the docker stack file else do updateService.sh
+      runas: ec2-user

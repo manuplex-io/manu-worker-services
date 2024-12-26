@@ -1,0 +1,41 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - echo Retrieving the previous image tag...
+      - PREVIOUS_IMAGE_TAG=$(aws ecr describe-images --repository-name $IMAGE_REPO_NAME --query "sort_by(imageDetails, &imagePushedAt)[-1].imageTags[0]" --output text || echo "None")
+      - if [ "$PREVIOUS_IMAGE_TAG" == "None" ]; then echo "No previous image tag found"; PREVIOUS_IMAGE_TAG=""; fi
+      - echo Previous image tag is $PREVIOUS_IMAGE_TAG
+      - mkdir -p codePipeline/codeDeploy
+      - echo $PREVIOUS_IMAGE_TAG > codePipeline/codeDeploy/previous_image_tag.txt
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the $IMAGE_REPO_NAME Docker image... 
+      - cd ./worker-services-1
+      - IMAGE_TAG=$(echo $CODEBUILD_BUILD_ID | sed 's/:/-/g') # Replace ":" with "-" to ensure compatibility
+      - echo Using image tag $IMAGE_TAG       
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      # - export IMAGE_TAG=$IMAGE_TAG  # Export IMAGE_TAG to make it available as an environment variable for later phases      
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - mkdir -p codePipeline/codeDeploy  # Ensure the directory exists
+      - echo $IMAGE_TAG > ../codePipeline/codeDeploy/image_tag.txt  # Save the tag to the correct location
+      - echo "Checking if the image_tag.txt file was created..."
+      - ls codePipeline/codeDeploy  # List files in the codeDeploy directory to verify image_tag.txt exists
+artifacts:
+  base-directory: codePipeline/codeDeploy
+  files:
+    - appspec.yml
+    - scripts/*
+    - image_tag.txt
+    - previous_image_tag.txt
+    - appspec_healthcheck.yml
+  discard-paths: no
