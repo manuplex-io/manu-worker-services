@@ -3,7 +3,7 @@ services:
     image: 637423298319.dkr.ecr.us-west-2.amazonaws.com/manu/worker-services:latest
     hostname: worker-services-1.manuplex-uswest-2.local
     networks:
-      - MP-prod-net1-overlay
+      - OB-prod-net1-overlay
     volumes:
       # - ./certs:/tls
       - worker-services-logs:/var/log/worker-services-1 # Named volume for logs
@@ -26,10 +26,10 @@ services:
       - RESTART_DELAY=1000
       - SERVICE_ID="{{.Task.ID}}"
     secrets:
-      - WORKER_SERVICES_REDIS_STACK_PASSWORD
+      - REDIS_STACK_PASSWORD
     command: >
       sh -c "
-      export REDIS_STACK_PASSWORD=$$(cat /run/secrets/WORKER_SERVICES_REDIS_STACK_PASSWORD | tr -d '\\n') &&
+      export REDIS_STACK_PASSWORD=$$(cat /run/secrets/REDIS_STACK_PASSWORD | tr -d '\\n') &&
       node --trace-warnings ./supervisorV2/supervisor.js"
     labels:
       # Consul Labels
@@ -46,16 +46,9 @@ services:
       options:
         max-size: "15m"
         max-file: "3"
-    deploy:
-      replicas: 2
-      placement:
-        constraints:
-          - "node.hostname == MP1-prod0"
 
 networks:
-  MP-dev-net1-overlay:
-    external: true
-  MP-prod-net1-overlay:
+  OB-prod-net1-overlay:
     external: true
 
 volumes:
@@ -63,7 +56,7 @@ volumes:
     driver: local
 
 secrets:
-  WORKER_SERVICES_REDIS_STACK_PASSWORD:
+  REDIS_STACK_PASSWORD:
     external: true
   
 
