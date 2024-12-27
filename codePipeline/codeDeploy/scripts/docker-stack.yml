@@ -5,8 +5,8 @@ services:
     networks:
       - OB-prod-net1-overlay
     volumes:
-      # - ./certs:/tls
-      - worker-services-logs:/var/log/worker-services-1 # Named volume for logs
+      - /ob1-efs/prod-cluster-1/worker-services/certs:/tls
+      - /ob1-efs/prod-cluster-1/worker-services/worker-services-logs:/var/log/worker-services-1 # Named volume for logs
     environment:
       - LOG_LEVEL=debug
       - ENV=prod
@@ -58,9 +58,3 @@ volumes:
 secrets:
   REDIS_STACK_PASSWORD:
     external: true
-  
-
-
-
-  
-
