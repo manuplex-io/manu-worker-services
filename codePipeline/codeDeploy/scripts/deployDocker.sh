@@ -2,7 +2,7 @@
 set -e
 
 # Customize the stack name here:
-STACK_NAME=${1:-"GreenStack"}
+STACK_NAME="${1:-uSt-bS}"
 
 # The script assumes docker-stack.yml is in the same directory if we copied it via appspec.yml:
 cd /home/ec2-user/codeDeploy/scripts

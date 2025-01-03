@@ -5,7 +5,7 @@ set -e
 REGION="us-west-2"
 ACCOUNT_ID="637423298319"
 
-STACK_NAME="${1:-GreenStack}"       # Can be overridden by CLI arg, defaults to "GreenStack"
+STACK_NAME="${1:-uSt-bS}"      # Can be overridden by CLI arg, defaults to "GreenStack"
 SERVICE_SHORT_NAME="worker-services-1"
 # Combine them into the full service name, e.g. "GreenStack_worker-service-1"
 SERVICE_NAME="${STACK_NAME}_${SERVICE_SHORT_NAME}"
