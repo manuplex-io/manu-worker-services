@@ -1,0 +1,7 @@
+version: 0.0
+os: linux
+hooks:
+  AfterInstall:
+    - location: scripts/deployDocker.sh #change to deployDocker.sh when changing the docker stack file else do updateService.sh
+      runas: ec2-user
+      arguments: ["uSt-gS", "2"]  # Updates Green Stack with 2 replicas

@@ -5,6 +5,9 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - echo Logging in to Docker Hub...
+      - echo $DOCKER_TOKEN
+      - echo $DOCKER_TOKEN | docker login --username $DOCKER_USERNAME --password-stdin
       - echo Retrieving the previous image tag...
       - PREVIOUS_IMAGE_TAG=$(aws ecr describe-images --repository-name $IMAGE_REPO_NAME --query "sort_by(imageDetails, &imagePushedAt)[-1].imageTags[0]" --output text || echo "None")
       - if [ "$PREVIOUS_IMAGE_TAG" == "None" ]; then echo "No previous image tag found"; PREVIOUS_IMAGE_TAG=""; fi
@@ -38,4 +41,5 @@ artifacts:
     - image_tag.txt
     - previous_image_tag.txt
     - appspec_healthcheck.yml
+    - appspec_greenstack.yml
   discard-paths: no
