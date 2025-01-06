@@ -7,7 +7,7 @@ files:
     destination: /home/ec2-user/codeDeploy/
 hooks:
   AfterInstall:
-    - location: scripts/deployDockerGreen.sh #change to deployDockerGreen.sh when changing the docker stack file else do updateServiceGreen.sh
+    - location: scripts/updateServiceGreen.sh #change to deployDockerGreen.sh when changing the docker stack file else do updateServiceGreen.sh
       runas: ec2-user
       # arguments:
         # - "uSt-gS"
