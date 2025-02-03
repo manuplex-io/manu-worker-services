@@ -2,7 +2,7 @@ import { createClient } from 'redis';
 import { Logger } from '@nestjs/common';
 
 
-const RedisHost = process.env.REDIS_STACK_HOST || 'redis-stack-server-1.manuplex-uswest-2.local';
+const RedisHost = process.env.REDIS_STACK_HOST || 'redis-stack-server-1.orangebox-uswest-2.local';
 const RedisPort = parseInt(process.env.REDIS_STACK_PORT || '6379', 10);
 const RedisPassword = process.env.REDIS_STACK_PASSWORD || 'notdefined';
 
@@ -33,7 +33,7 @@ export class RedisService {
 
     //make a new function to retrieve a json object from redis at agentService:workerService:workflows:${temporalWorkflowId}:ENV
     async getWorkflowENVVariables(temporalWorkflowId: string): Promise<Record<string, any>> {
-        const key = `agentService:workerService:ENVVaribales:${temporalWorkflowId}`;
+        const key = `agentService:workerService:ENVVariables:${temporalWorkflowId}`;
         const data = await this.client.get(key);
         return data ? JSON.parse(data) : {};
     }
@@ -219,3 +219,58 @@ export class RedisService {
         await this.client.quit();
     }
 }
+
+
+// #region - EXPERIMENTAL
+// /**
+//  * Fetch all subworkflow details for a given workflow.
+//  * @param workflowName Name of the parent workflow.
+//  * @returns A record of all subworkflow key-value pairs.
+//  */
+// async getSubworkflowDetails(workflowName: string): Promise<Record<string, string>> {
+//     this.logger.debug(`Fetching subworkflow details for: ${workflowName}`);
+    
+//     const baseKey = `agentService:workerService:workflows:${workflowName}:childWorkflow`;
+//     this.logger.debug(`Using base Redis key: ${baseKey}`);
+
+//     try {
+//         const keys = await this.client.keys(`${baseKey}*`);
+        
+//         this.logger.debug(`Found ${keys.length} subworkflow keys`);
+
+//         if (keys.length === 0) {
+//             this.logger.debug(`No subworkflows found for workflow: ${workflowName}`);
+//             return {};
+//         }
+
+//         // Fetch all values for the found keys
+//         const values = await Promise.all(
+//             keys.map(async (key) => {
+//                 const value = await this.client.get(key);
+//                 return { key, value: value || '' };
+//             })
+//         );
+
+//         // Convert to record/map
+//         const result = values.reduce((acc, { key, value }) => {
+//             const keyName = key.replace(`${baseKey}:`, '');
+//             acc[keyName] = value;
+//             return acc;
+//         }, {} as Record<string, string>);
+
+//         this.logger.debug(`Retrieved ${Object.keys(result).length} subworkflow entries`);
+        
+//         return result;
+
+//     } catch (error) {
+//         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+//         this.logger.error(`Error fetching subworkflow details for ${workflowName}: ${errorMessage}`, {
+//             error,
+//             workflowName,
+//             baseKey
+//         });
+
+//         return {};
+//     }
+// }
+// #endregion

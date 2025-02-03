@@ -1,6 +1,6 @@
 {
   "name": "worker-services-1",
-  "version": "0.1.0",
+  "version": "0.3.1",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
@@ -22,10 +22,14 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",
+    "@nestjs/microservices": "^10.4.6",
     "@temporalio/client": "^1.11.5",
     "@temporalio/worker": "^1.11.5",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "kafkajs": "^2.2.4",
     "redis": "^4.7.0"
   }
 }

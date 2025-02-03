@@ -4,7 +4,7 @@ import { Worker, NativeConnection } from '@temporalio/worker';
 import { Connection, WorkflowClient } from '@temporalio/client';
 
 const Namespace = process.env.TEMPORAL_NAMESPACE || 'ob1-temporal-namespace';
-const TemporalAddress = process.env.TEMPORAL_ADDRESS || 'temporal-server-1.manuplex-uswest-2.local:7233';
+const TemporalAddress = process.env.TEMPORAL_ADDRESS || 'temporal-server-1.orangebox-uswest-2.local:7233';
 
 const logger = new Logger('TemporalConfig');
 

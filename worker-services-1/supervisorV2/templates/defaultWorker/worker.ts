@@ -18,7 +18,7 @@ function isShutdownState(state: State): boolean {
 }
 
 async function createAndRunWorker() {
-    const temporalAddress = process.env.TEMPORAL_ADDRESS || 'temporal-server-1.manuplex-uswest-2.local:7233';
+    const temporalAddress = process.env.TEMPORAL_ADDRESS || 'temporal-server-1.orangebox-uswest-2.local:7233';
     const taskQueue = process.env.AG_TEMPORAL_TASK_QUE_NAME || 'agentprocess_QUEUE';
     const namespace = process.env.TEMPORAL_NAMESPACE || 'ob1-temporal-namespace';
 

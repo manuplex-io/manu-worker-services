@@ -2,9 +2,9 @@ ENV=localhost
 RESTART_DELAY=1000
 
 TEMPORAL_NAMESPACE=ob1-temporal-namespace
-TEMPORAL_ADDRESS=temporal-server-1.manuplex-uswest-2.local:7233
+TEMPORAL_ADDRESS=temporal-server-1.orangebox-uswest-2.local:7233
 TEMPORAL_TASK_QUE_NAME=agentprocess_QUEUE
 
-REDIS_HOST=redis-stack-server-1.manuplex-uswest-2.local
+REDIS_HOST=redis-stack-server-1.orangebox-uswest-2.local
 REDIS_PORT=6379
 REDIS_PASSWORD=
