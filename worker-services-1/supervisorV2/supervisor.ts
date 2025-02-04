@@ -4,12 +4,53 @@ import { DynamicLoadingService } from './services/dynamicLoading.service';
 import { WorkerManagementService } from './services/workerManagement.service';
 import { Logger } from '@nestjs/common';
 import { getTemporalConnection, getWorkflowClient } from './config/temporal.config';
-import express from 'express';
+import { KafkaService } from './services/kafka.service';
+import { OB1AgentService } from './interfaces/ob1AgentService.interface';
+import express, { Request, Response } from 'express';
 
 const logger = new Logger('Supervisor');
+const app = express();
+const PORT = 3000;
+
+// Add NestJS-style health check endpoint
+app.get('/services/health', (req: Request, res: Response) => {
+    const healthCheck = {
+        status: 'ok',
+        info: {
+            supervisor: {
+                status: 'up'
+            }
+        },
+        error: {},
+        details: {
+            supervisor: {
+                status: 'up'
+            }
+        }
+    };
+
+    try {
+        res.status(200).json(healthCheck);
+    } catch (e) {
+        healthCheck.status = 'error';
+        healthCheck.error = {
+            supervisor: {
+                status: 'down',
+                message: e instanceof Error ? e.message : 'An error occurred'
+            }
+        };
+        res.status(503).json(healthCheck);
+    }
+});
+
+// Start express server
+app.listen(PORT, () => {
+    logger.log(`Health check endpoint listening on port ${PORT}`);
+});
 
 async function pollTemporalWorkflows(
     redisService: RedisService,
+    kafkaService: KafkaService,
     workerManagementService: WorkerManagementService,
     dynamicLoadingService: DynamicLoadingService
 ) {
@@ -41,7 +82,7 @@ async function pollTemporalWorkflows(
             //logger.log(`Polling Temporal for running workflows in namespace: ${namespace}`);
             const workflows = await workflowClient.workflowService.listWorkflowExecutions({
                 namespace,
-                query: `ExecutionStatus="Running" AND TaskQueue="${taskQueue}"`,
+                query: `ExecutionStatus="Running"`,
             });
 
             if (!workflows.executions || workflows.executions.length === 0) {
@@ -72,6 +113,19 @@ async function pollTemporalWorkflows(
                 // Check if the workflow code is available in Redis
                 const isAvailable = await redisService.isWorkflowAvailable(workflowType);
                 if (!isAvailable) {
+                    const request : OB1AgentService.CRUDRequest = {
+                        userOrgId: 'worker-service-1',
+                        sourceFunction: 'loadWorkflow',
+                        CRUDFunctionNameInput: 'workflowCRUD-V1',
+                        CRUDFunctionInput: {
+                            CRUDOperationName: 'GET',
+                            CRUDRoute: 'workflows/getCode',
+                            queryParams: {workflowExternalName: workflowType}
+                        },
+                        personRole: 'USER',
+                        personId: 'worker-service-1'
+                    };
+                    await kafkaService.sendMessage(request);      
                     logger.warn(`Workflow code for '${workflowType}' is not available in Redis. Skipping.`);
                     continue;
                 }
@@ -117,32 +171,11 @@ async function pollTemporalWorkflows(
     }, SUPERVISOR_CHECK_INTERVAL);
 }
 
-function startExpressServer() {
-    const app = express();
-    const PORT = process.env.PORT || 3000; // Use environment variable or default to 3000
-
-    // Health check route
-    app.get('/services/health', (req, res) => {
-        // Define your health check logic
-            res.status(200).json({ status: 'ok' });
-    });
-
-    // Start the server
-    app.listen(PORT, () => {
-        logger.log(`Express server is running at http://localhost:${PORT}/services/health`);
-    });
-
-    app.on('error', (err: any) => {
-        logger.error(`Express server error: ${err.message}`);
-    });
-}
-
 async function main() {
-
-    startExpressServer()
-
     const redisService = new RedisService();
-    const dynamicLoadingService = new DynamicLoadingService(redisService);
+    const kafkaService = new KafkaService();
+    await kafkaService.connect();
+    const dynamicLoadingService = new DynamicLoadingService(redisService, kafkaService);
 
     // Initialize WorkerManagementService asynchronously
     const workerManagementService = new WorkerManagementService(dynamicLoadingService, redisService);
@@ -151,7 +184,13 @@ async function main() {
     // Add a 5 second delay before starting workflow polling
     await new Promise(resolve => setTimeout(resolve, 5000));
     logger.log('Starting workflow polling after 5 second initialization delay...');
-    await pollTemporalWorkflows(redisService, workerManagementService, dynamicLoadingService);
+    await pollTemporalWorkflows(redisService, kafkaService, workerManagementService, dynamicLoadingService);
+
+    // Add cleanup on process termination
+    process.on('SIGTERM', async () => {
+        await kafkaService.disconnect();
+        process.exit(0);
+    });
 }
 
 

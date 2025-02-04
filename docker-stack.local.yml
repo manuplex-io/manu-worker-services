@@ -1,0 +1,66 @@
+services:
+  worker-services-1:
+    image: worker-services:latest
+    hostname: worker-services-1.manuplex-uswest-2.local
+    networks:
+      - OB-prod-net1-overlay
+    volumes:
+      # - /ob1-efs/prod-cluster-1/worker-services/certs:/tls
+      - worker-services-logs:/var/log/worker-services-1 # Named volume for logs
+    environment:
+      - LOG_LEVEL=debug
+      - ENV=localhost
+      - WS_WORKER_COUNT=${WS_WORKER_COUNT:-4}
+      - TEMPORAL_NAMESPACE=ob1-temporal-namespace
+      - TEMPORAL_ADDRESS=temporal-server-1.manuplex-uswest-2.local:7233
+      - AG_TEMPORAL_TASK_QUE_NAME=agentprocess_QUEUE
+      - REDIS_STACK_HOST=redis-stack-server-1.manuplex-uswest-2.local
+      - REDIS_STACK_PORT=6379
+      - WS_WORKER_COUNT=2
+      - WS_HEALTHCHECK_INTERVAL=30000
+      - WS_HEALTHCHECK_TIMEOUT=2000
+      - WS_WAIT_SHUTDOWN_TIME=15000
+      - WS_MAX_SHUTDOWN_ATTEMPTS=3
+      - WS_MAX_HEALTHCHECK_MISSED=9
+      - WS_MAX_EXECUTION_TIME=900000
+      - RESTART_DELAY=1000
+      - AWS_REGION=us-west-2
+      - SERVICE_ID="{{.Task.ID}}"
+    secrets:
+      - REDIS_STACK_PASSWORD
+    command: >
+      sh -c "
+      export REDIS_STACK_PASSWORD=$$(cat /run/secrets/REDIS_STACK_PASSWORD | tr -d '\\n') &&
+      export OPENAI_API_KEY=$$(cat /run/secrets/OPENAI_API_KEY) &&
+      export AWS_ACCESS_KEY_ID=$$(cat /run/secrets/AGENT_SERVICES_AWS_ACCESS_KEY_ID) &&
+      export AWS_SECRET_ACCESS_KEY=$$(cat /run/secrets/AGENT_SERVICES_AWS_SECRET_ACCESS_KEY) &&
+      export LAMBDA_ROLE_ARN=$$(cat /run/secrets/AGENT_SERVICES_LAMBDA_ROLE_ARN) &&
+      export PORTKEY_API_KEY=$$(cat /run/secrets/AGENT_SERVICES_PORTKEY_API_KEY) &&
+      node --trace-warnings ./supervisorV2/supervisor.js"
+    labels:
+      # Consul Labels
+      - "register-consul.enable=true"
+      - "register-consul.service-id=worker-services-1"
+      - "register-consul.service-name=worker-services"
+      - "register-consul.check.healthcheck-endpoint=http://worker-services-1.manuplex-uswest-2.local:3000/services/health"
+      - "register-consul.service-tags=worker-services,manu-os,nestjs,prod"
+      - "register-consul.check.interval=15s"
+      - "register-consul.check.timeout=1s"
+      - "register-consul.check.deregister=72h"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "15m"
+        max-file: "3"
+
+networks:
+  OB-prod-net1-overlay:
+    external: true
+
+volumes:
+  worker-services-logs:
+    driver: local
+
+secrets:
+  REDIS_STACK_PASSWORD:
+    external: true
