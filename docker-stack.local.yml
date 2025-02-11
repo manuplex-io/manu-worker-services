@@ -28,6 +28,11 @@ services:
       - SERVICE_ID="{{.Task.ID}}"
     secrets:
       - REDIS_STACK_PASSWORD
+      - OPENAI_API_KEY
+      - AGENT_SERVICES_PORTKEY_API_KEY
+      - AGENT_SERVICES_AWS_ACCESS_KEY_ID
+      - AGENT_SERVICES_AWS_SECRET_ACCESS_KEY
+      - AGENT_SERVICES_LAMBDA_ROLE_ARN
     command: >
       sh -c "
       export REDIS_STACK_PASSWORD=$$(cat /run/secrets/REDIS_STACK_PASSWORD | tr -d '\\n') &&
@@ -63,4 +68,14 @@ volumes:
 
 secrets:
   REDIS_STACK_PASSWORD:
+    external: true
+  OPENAI_API_KEY:
+    external: true
+  AGENT_SERVICES_PORTKEY_API_KEY:
+    external: true
+  AGENT_SERVICES_AWS_ACCESS_KEY_ID:
+    external: true
+  AGENT_SERVICES_AWS_SECRET_ACCESS_KEY:
+    external: true
+  AGENT_SERVICES_LAMBDA_ROLE_ARN:
     external: true
