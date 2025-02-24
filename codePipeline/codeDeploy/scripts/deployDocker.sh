@@ -16,12 +16,3 @@ docker stack deploy -c docker-stack.yml "$STACK_NAME"
 
 echo "Deployment complete!"
 
-# Scale the service (replace 'worker-services-1' with your service name)
-SERVICE_SHORT_NAME="worker-services-1"
-SERVICE_NAME="${STACK_NAME}_${SERVICE_SHORT_NAME}"
-
-echo "Scaling service $SERVICE_NAME to $REPLICAS replicas..."
-
-docker service scale "$SERVICE_NAME=$REPLICAS"
-
-echo "Service '$SERVICE_NAME' scaled to $REPLICAS replicas successfully!"
