@@ -24,12 +24,23 @@ services:
       - WS_MAX_HEALTHCHECK_MISSED=9
       - WS_MAX_EXECUTION_TIME=900000
       - RESTART_DELAY=1000
+      - AWS_REGION=us-west-2
       - SERVICE_ID="{{.Task.ID}}"
     secrets:
       - REDIS_STACK_PASSWORD
+      - OPENAI_API_KEY
+      - AGENT_SERVICES_PORTKEY_API_KEY
+      - AGENT_SERVICES_AWS_ACCESS_KEY_ID
+      - AGENT_SERVICES_AWS_SECRET_ACCESS_KEY
+      - AGENT_SERVICES_LAMBDA_ROLE_ARN
     command: >
       sh -c "
       export REDIS_STACK_PASSWORD=$$(cat /run/secrets/REDIS_STACK_PASSWORD | tr -d '\\n') &&
+      export OPENAI_API_KEY=$$(cat /run/secrets/OPENAI_API_KEY) &&
+      export AWS_ACCESS_KEY_ID=$$(cat /run/secrets/AGENT_SERVICES_AWS_ACCESS_KEY_ID) &&
+      export AWS_SECRET_ACCESS_KEY=$$(cat /run/secrets/AGENT_SERVICES_AWS_SECRET_ACCESS_KEY) &&
+      export LAMBDA_ROLE_ARN=$$(cat /run/secrets/AGENT_SERVICES_LAMBDA_ROLE_ARN) &&
+      export PORTKEY_API_KEY=$$(cat /run/secrets/AGENT_SERVICES_PORTKEY_API_KEY) &&
       node --trace-warnings ./supervisorV2/supervisor.js"
     labels:
       # Consul Labels
@@ -58,3 +69,14 @@ volumes:
 secrets:
   REDIS_STACK_PASSWORD:
     external: true
+  OPENAI_API_KEY:
+    external: true
+  AGENT_SERVICES_PORTKEY_API_KEY:
+    external: true
+  AGENT_SERVICES_AWS_ACCESS_KEY_ID:
+    external: true
+  AGENT_SERVICES_AWS_SECRET_ACCESS_KEY:
+    external: true
+  AGENT_SERVICES_LAMBDA_ROLE_ARN:
+    external: true
+
