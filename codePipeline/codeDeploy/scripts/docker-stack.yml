@@ -16,7 +16,7 @@ services:
       - AG_TEMPORAL_TASK_QUE_NAME=agentprocess_QUEUE
       - REDIS_STACK_HOST=redis-stack-server-1.manuplex-uswest-2.local
       - REDIS_STACK_PORT=6379
-      - WS_WORKER_COUNT=3
+      - WS_WORKER_COUNT=2
       - WS_HEALTHCHECK_INTERVAL=30000
       - WS_HEALTHCHECK_TIMEOUT=2000
       - WS_WAIT_SHUTDOWN_TIME=15000
